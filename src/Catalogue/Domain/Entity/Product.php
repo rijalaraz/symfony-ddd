@@ -7,13 +7,18 @@ use App\Catalogue\Domain\Exception\InsufficientStockException;
 use App\Catalogue\Domain\Exception\NonPositiveQuantityException;
 use App\Catalogue\Domain\Exception\OverCommitReservationException;
 use App\SharedKernel\Domain\ValueObject\Money;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 class Product
 {
 
+    #[Groups(['product:list', 'product:detail'])]
     private string $id;
+    #[Groups(['product:create'])]
     private string $name;
+    #[Groups(['product:create'])]
     private int $price;
+    #[Groups(['product:create'])]
     private int $onHand = 0;
     private int $onHold = 0;
 
