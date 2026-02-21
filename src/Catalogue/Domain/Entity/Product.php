@@ -14,13 +14,13 @@ class Product
 
     #[Groups(['product:list', 'product:detail'])]
     private string $id;
-    #[Groups(['product:create'])]
+    #[Groups(['product:create','product:list'])]
     private string $name;
     #[Groups(['product:create'])]
     private int $price;
     #[Groups(['product:create'])]
-    private int $onHand = 0;
-    private int $onHold = 0;
+    private int $onHand = 0; // à portée de main
+    private int $onHold = 0; // en attente (réservé)
 
     public static function create(string $id, string $name, Money $price, int $onHand): self
     {
@@ -69,6 +69,12 @@ class Product
         return Money::fromMinor($this->price);
     }
 
+    #[Groups(['product:list'])]
+    public function getPriceMinor(): int
+    {
+        return $this->price;
+    }
+
     public function getId(): string
     {
         return $this->id;
@@ -86,6 +92,12 @@ class Product
 
 
     public function getAvailable(): int
+    {
+        return $this->onHand - $this->onHold;
+    }
+
+    #[Groups(['product:list'])]
+    public function getQuantity(): int
     {
         return $this->onHand - $this->onHold;
     }

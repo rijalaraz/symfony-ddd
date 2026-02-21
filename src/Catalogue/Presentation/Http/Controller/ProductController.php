@@ -12,6 +12,7 @@ use Nelmio\ApiDocBundle\Attribute\Model;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Uid\Uuid;
 use OpenApi\Attributes as OA;
 
@@ -20,10 +21,43 @@ class ProductController
 {
 
     #[Route('', name: 'products.list', methods: ['GET'])]
-    public function listProducts(GetProductsQueryHandler $handler, Request $request): JsonResponse
+    #[OA\Parameter(
+        name: 'only_available',
+        in: 'query',
+        description: 'Filter to return only products that are currently available (in stock).',
+        required: false,
+        schema: new OA\Schema(type: 'boolean')
+    )]
+    #[OA\Parameter(
+        name: 'max_price',
+        in: 'query',
+        description: 'Filter to return only products with a price less than or equal to the specified value.',
+        required: false,
+        schema: new OA\Schema(type: 'integer')
+    )]
+    #[OA\Response(
+        response: JsonResponse::HTTP_OK,
+        description: 'List of products',
+        content: new OA\JsonContent(
+            type:'object',
+            properties: [
+                new OA\Property(
+                    property: 'data',
+                    type:'array',
+                    items: new OA\Items(ref: new Model(type: Product::class, groups: ['product:list']))
+                )
+            ]
+        )
+    )]
+    public function listProducts(GetProductsQueryHandler $handler, Request $request, SerializerInterface $serializer): JsonResponse
     {
-        $envelope = ResponseEnvelope::success($handler(new GetProductsQuery($request->get('only_available', false), $request->get('max_price'))));
-        return new JsonResponse($envelope->body, $envelope->status);
+        $onlyAvailable = filter_var($request->query->get('only_available', 'false'), FILTER_VALIDATE_BOOLEAN);
+
+        $data = $handler(new GetProductsQuery($onlyAvailable, $request->query->get('max_price')));
+
+        $json = $serializer->serialize($data,'json', ['groups' => 'product:list']);
+
+        return new JsonResponse($json, JsonResponse::HTTP_OK, [], true);
     }
 
     #[Route('', name: 'products.create', methods: ['POST'])]

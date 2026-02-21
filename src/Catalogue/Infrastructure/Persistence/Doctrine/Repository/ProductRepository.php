@@ -6,11 +6,15 @@ use App\Catalogue\Domain\Entity\Product;
 use App\Catalogue\Domain\Repository\ProductRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 #[AsAlias(id: ProductRepositoryInterface::class)]
 class ProductRepository implements ProductRepositoryInterface
 {
-    public function __construct(private readonly EntityManagerInterface $entityManager)
+    public function __construct(
+        private readonly EntityManagerInterface $entityManager,
+        private readonly RequestStack $requestStack,
+    )
     {
     }
 
@@ -22,9 +26,15 @@ class ProductRepository implements ProductRepositoryInterface
     public function getCollection(bool $onlyAvailable, ?int $maxPrice): array
     {
         $qb = $this->entityManager->createQueryBuilder()->select("p")->from(Product::class, "p");
-        if ($onlyAvailable) {
-            $qb->andWhere("p.on_hand - p.on_hold > 0");
+
+        if($this->requestStack->getCurrentRequest()->query->has('only_available')) {
+            if ($onlyAvailable) {
+                $qb->andWhere("p.onHand - p.onHold > 0");
+            } else {
+                $qb->andWhere("p.onHand - p.onHold <= 0");
+            }
         }
+
         if ($maxPrice) {
             $qb->andWhere("p.price <= :maxPrice")->setParameter("maxPrice", $maxPrice);
         }
