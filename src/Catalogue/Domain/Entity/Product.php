@@ -19,9 +19,9 @@ class Product
 
     public static function create(string $id, string $name, Money $price, int $onHand): self
     {
-        if ($name === '') {
-            throw new EmptyProductNameException('Name required.');
-        }
+        // if ($name === '') {
+        //     throw new EmptyProductNameException('Name required.');
+        // }
         $self = new self();
         $self->id = $id;
         $self->name = $name;
