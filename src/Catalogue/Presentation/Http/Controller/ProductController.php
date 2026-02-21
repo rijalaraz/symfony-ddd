@@ -53,9 +53,11 @@ class ProductController
     {
         $onlyAvailable = filter_var($request->query->get('only_available', 'false'), FILTER_VALIDATE_BOOLEAN);
 
-        $data = $handler(new GetProductsQuery($onlyAvailable, $request->query->get('max_price')));
+        $query = new GetProductsQuery($onlyAvailable, $request->query->get('max_price'));
 
-        $json = $serializer->serialize($data,'json', ['groups' => 'product:list']);
+        $products = $handler($query);
+
+        $json = $serializer->serialize($products,'json', ['groups' => 'product:list']);
 
         return new JsonResponse($json, JsonResponse::HTTP_OK, [], true);
     }
