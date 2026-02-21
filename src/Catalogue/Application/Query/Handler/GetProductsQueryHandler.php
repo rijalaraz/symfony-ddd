@@ -16,6 +16,7 @@ class GetProductsQueryHandler
         $result = [];
         $collection = $this->productRepository->getCollection($query->onlyAvailable, $query->maxPrice);
         if (!empty($collection)) {
+
             $result = $collection;
 
             // foreach ($collection as $product) {
@@ -28,8 +29,6 @@ class GetProductsQueryHandler
             // }
         }
 
-        return [
-            'data' => $result
-        ];
+        return $result;
     }
 }

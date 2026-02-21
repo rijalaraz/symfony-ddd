@@ -9,6 +9,7 @@ use App\Catalogue\Application\Query\Handler\GetProductsQueryHandler;
 use App\Catalogue\Domain\Entity\Product;
 use App\SharedKernel\Http\ResponseEnvelope;
 use Nelmio\ApiDocBundle\Attribute\Model;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -17,7 +18,7 @@ use Symfony\Component\Uid\Uuid;
 use OpenApi\Attributes as OA;
 
 #[Route('/api/products')]
-class ProductController
+class ProductController extends AbstractController
 {
 
     #[Route('', name: 'products.list', methods: ['GET'])]
@@ -57,9 +58,19 @@ class ProductController
 
         $products = $handler($query);
 
-        $json = $serializer->serialize($products,'json', ['groups' => 'product:list']);
+        return $this->json([
+            'data' => $products
+        ], context:[
+            'groups' => 'product:list'
+        ]);
 
-        return new JsonResponse($json, JsonResponse::HTTP_OK, [], true);
+        // $json = $serializer->serialize([
+        //     'data' => $products
+        // ],'json', [
+        //     'groups' => 'product:list'
+        // ]);
+
+        // return new JsonResponse($json, JsonResponse::HTTP_OK, [], true);
     }
 
     #[Route('', name: 'products.create', methods: ['POST'])]
