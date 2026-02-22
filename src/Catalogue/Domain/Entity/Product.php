@@ -18,7 +18,7 @@ class Product
     private string $name;
     #[Groups(['product:create'])]
     private int $price;
-    #[Groups(['product:create'])]
+    private bool $on_hand = false;
     private int $onHand = 0; // à portée de main
     private int $onHold = 0; // en attente (réservé)
 
@@ -83,6 +83,12 @@ class Product
     public function getOnHand(): int
     {
         return $this->onHand;
+    }
+
+    #[Groups(['product:create'])]
+    public function getOn_hand(): int
+    {
+        return $this->on_hand;
     }
 
     public function getOnHold(): int

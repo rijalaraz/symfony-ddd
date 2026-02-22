@@ -50,6 +50,7 @@ class ProductController extends AbstractController
             ]
         )
     )]
+    #[OA\Tag(name: 'Products')]
     public function listProducts(GetProductsQueryHandler $handler, Request $request, SerializerInterface $serializer): JsonResponse
     {
         $onlyAvailable = filter_var($request->query->get('only_available', 'false'), FILTER_VALIDATE_BOOLEAN);
@@ -88,11 +89,12 @@ class ProductController extends AbstractController
             ]
         )
     )]
+    #[OA\Tag(name: 'Products')]
     public function create(CreateProductCommandHandler $handler, Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
         $command = new CreateProductCommand(
-            Uuid::v7()->toString(), $data['name'] ?? '', (int)($data['price'] ?? 0), (int)($data['onHand'] ?? 0)
+            Uuid::v7()->toString(), $data['name'] ?? '', (int)($data['price'] ?? 0), (int)($data['on_hand'] ?? 0)
         );
         $product = $handler($command);
         $envelope = ResponseEnvelope::success(['id' => $product->getId()], JsonResponse::HTTP_CREATED);
