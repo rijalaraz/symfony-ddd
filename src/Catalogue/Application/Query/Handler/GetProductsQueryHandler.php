@@ -21,8 +21,8 @@ class GetProductsQueryHandler
                 $result[] = [
                     'id' => $product->getId(),
                     'name' => $product->getName(),
-                    'price' => $product->getPrice()->toMajorString(),
-                    'quantity' => $product->getAvailable()
+                    'majorPrice' => $product->getPrice()->toMajorString(),
+                    'availableQuantity' => $product->getAvailable()
                 ];
             }
 

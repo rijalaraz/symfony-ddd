@@ -2,12 +2,15 @@
 
 namespace App\Order\Presentation\Http\Controller;
 
+use App\Catalogue\Dto\ProductDto;
 use App\Order\Application\Command\CreateOrderCommand;
 use App\Order\Application\Command\Handler\CreateOrderCommandHandler;
 use App\Order\Application\Command\Handler\FulfillOrderCommandHandler;
 use App\Order\Application\Query\GetOrdersQuery;
 use App\Order\Application\Query\Handler\GetOrdersQueryHandler;
+use App\Order\Dto\OrderDto;
 use App\SharedKernel\Http\ResponseEnvelope;
+use Nelmio\ApiDocBundle\Attribute\Model;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -30,26 +33,7 @@ class OrderController
     #[OA\RequestBody(
         description: 'Order creation payload',
         required: true,
-        content: new OA\JsonContent(
-            type:'object',
-            properties: [
-                new OA\Property(property: 'amount_to_pay', type: 'integer', description: 'Total amount to pay for the order in minor units (e.g., cents).'),
-                new OA\Property(
-                    property: 'products',
-                    type:'array',
-                    description: 'List of products included in the order.',
-                    items: new OA\Items(
-                        type:'object',
-                        properties: [
-                            new OA\Property(property: 'product_id', type: 'string', description: 'ID of the product.'),
-                            new OA\Property(property: 'name', type: 'string', description: 'Name of the product.'),
-                            new OA\Property(property: 'quantity', type: 'integer', description: 'Quantity of the product.'),
-                            new OA\Property(property: 'price', type: 'integer', description: 'Price of the products in minor units (e.g., cents).')
-                        ]
-                    )
-                )
-            ]
-        )
+        content: new OA\JsonContent(ref: new Model(type: OrderDto::class, groups: ['order:create']))
     )]
     #[OA\Response(
         response: JsonResponse::HTTP_CREATED,
@@ -57,7 +41,7 @@ class OrderController
         content: new OA\JsonContent(
             type:'object',
             properties: [
-                new OA\Property(property: 'id', type: 'string', description: 'ID of the created order.')
+                new OA\Property(property: 'data', ref:new Model(type:OrderDto::class, groups: ['order:detail']))
             ]
         )
     )]
