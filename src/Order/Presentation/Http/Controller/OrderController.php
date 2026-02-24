@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Uid\Uuid;
+use OpenApi\Attributes as OA;
 
 #[Route('/api/orders')]
 class OrderController
@@ -26,9 +27,46 @@ class OrderController
     }
 
     #[Route('', name: 'orders.create', methods: ['POST'])]
+    #[OA\RequestBody(
+        description: 'Order creation payload',
+        required: true,
+        content: new OA\JsonContent(
+            type:'object',
+            properties: [
+                new OA\Property(property: 'amount_to_pay', type: 'integer', description: 'Total amount to pay for the order in minor units (e.g., cents).'),
+                new OA\Property(
+                    property: 'products',
+                    type:'array',
+                    description: 'List of products included in the order.',
+                    items: new OA\Items(
+                        type:'object',
+                        properties: [
+                            new OA\Property(property: 'product_id', type: 'string', description: 'ID of the product.'),
+                            new OA\Property(property: 'name', type: 'string', description: 'Name of the product.'),
+                            new OA\Property(property: 'quantity', type: 'integer', description: 'Quantity of the product.'),
+                            new OA\Property(property: 'price', type: 'integer', description: 'Price of the products in minor units (e.g., cents).')
+                        ]
+                    )
+                )
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: JsonResponse::HTTP_CREATED,
+        description: 'Order created successfully',
+        content: new OA\JsonContent(
+            type:'object',
+            properties: [
+                new OA\Property(property: 'id', type: 'string', description: 'ID of the created order.')
+            ]
+        )
+    )]
+    #[OA\Tag(name: 'Orders')]
     public function create(CreateOrderCommandHandler $handler, Request $request): JsonResponse
     {
-        $command = new CreateOrderCommand(Uuid::v7()->toString(), $request->get('amount_to_pay', 0), $request->get('products', []));
+        $data = json_decode($request->getContent(), true);
+
+        $command = new CreateOrderCommand(Uuid::v7()->toString(), $data['amount_to_pay'] ?? 0, $data['products'] ?? []);
 
         $order = $handler($command);
         $envelope = ResponseEnvelope::success(['id' => $order->getId()], JsonResponse::HTTP_CREATED);

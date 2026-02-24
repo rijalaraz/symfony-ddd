@@ -7,6 +7,7 @@ use App\Catalogue\Application\Command\Handler\CreateProductCommandHandler;
 use App\Catalogue\Application\Query\GetProductsQuery;
 use App\Catalogue\Application\Query\Handler\GetProductsQueryHandler;
 use App\Catalogue\Domain\Entity\Product;
+use App\Catalogue\Dto\ProductDto;
 use App\SharedKernel\Http\ResponseEnvelope;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -45,7 +46,7 @@ class ProductController extends AbstractController
                 new OA\Property(
                     property: 'data',
                     type:'array',
-                    items: new OA\Items(ref: new Model(type: Product::class, groups: ['product:list']))
+                    items: new OA\Items(ref: new Model(type: ProductDto::class, groups: ['product:list']))
                 )
             ]
         )
@@ -78,14 +79,14 @@ class ProductController extends AbstractController
     #[OA\RequestBody(
         description: 'Product data',
         required: true,
-        content: new OA\JsonContent(ref: new Model(type: Product::class, groups: ['product:create']))
+        content: new OA\JsonContent(ref: new Model(type: ProductDto::class, groups: ['product:create']))
     )]
     #[OA\Response(
         response: JsonResponse::HTTP_CREATED,
         description: 'Product created successfully',
         content: new OA\JsonContent(
             properties: [
-                new OA\Property(property: 'data', ref: new Model(type: Product::class, groups: ['product:detail'])),
+                new OA\Property(property: 'data', ref: new Model(type: ProductDto::class, groups: ['product:detail'])),
             ]
         )
     )]

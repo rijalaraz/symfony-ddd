@@ -7,18 +7,12 @@ use App\Catalogue\Domain\Exception\InsufficientStockException;
 use App\Catalogue\Domain\Exception\NonPositiveQuantityException;
 use App\Catalogue\Domain\Exception\OverCommitReservationException;
 use App\SharedKernel\Domain\ValueObject\Money;
-use Symfony\Component\Serializer\Annotation\Groups;
 
 class Product
 {
-
-    #[Groups(['product:list', 'product:detail'])]
     private string $id;
-    #[Groups(['product:create','product:list'])]
     private string $name;
-    #[Groups(['product:create'])]
     private int $price;
-    private bool $on_hand = false;
     private int $onHand = 0; // à portée de main
     private int $onHold = 0; // en attente (réservé)
 
@@ -69,12 +63,6 @@ class Product
         return Money::fromMinor($this->price);
     }
 
-    #[Groups(['product:list'])]
-    public function getPriceMinor(): int
-    {
-        return $this->price;
-    }
-
     public function getId(): string
     {
         return $this->id;
@@ -85,25 +73,12 @@ class Product
         return $this->onHand;
     }
 
-    #[Groups(['product:create'])]
-    public function getOn_hand(): int
-    {
-        return $this->on_hand;
-    }
-
     public function getOnHold(): int
     {
         return $this->onHold;
     }
 
-
     public function getAvailable(): int
-    {
-        return $this->onHand - $this->onHold;
-    }
-
-    #[Groups(['product:list'])]
-    public function getQuantity(): int
     {
         return $this->onHand - $this->onHold;
     }
