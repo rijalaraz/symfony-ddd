@@ -2,7 +2,6 @@
 
 namespace App\Order\Presentation\Http\Controller;
 
-use App\Catalogue\Dto\ProductDto;
 use App\Order\Application\Command\CreateOrderCommand;
 use App\Order\Application\Command\Handler\CreateOrderCommandHandler;
 use App\Order\Application\Command\Handler\FulfillOrderCommandHandler;
@@ -11,6 +10,7 @@ use App\Order\Application\Query\Handler\GetOrdersQueryHandler;
 use App\Order\Dto\OrderDto;
 use App\SharedKernel\Http\ResponseEnvelope;
 use Nelmio\ApiDocBundle\Attribute\Model;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -18,15 +18,44 @@ use Symfony\Component\Uid\Uuid;
 use OpenApi\Attributes as OA;
 
 #[Route('/api/orders')]
-class OrderController
+class OrderController extends AbstractController
 {
 
     #[Route('', name: 'orders.list', methods: ['GET'])]
+    #[OA\Parameter(
+        name: 'status',
+        in: 'query',
+        description: 'Filter to return only orders with the specified status (e.g., pending, fulfilled).',
+        required: false,
+        schema: new OA\Schema(type: 'string')
+    )]
+    #[OA\Response(
+        response: JsonResponse::HTTP_OK,
+        description: 'List of orders',
+        content: new OA\JsonContent(
+            type:'object',
+            properties: [
+                new OA\Property(
+                    property: 'data',
+                    type:'array',
+                    items: new OA\Items(ref: new Model(type: OrderDto::class, groups: ['order:list']))
+                )
+            ]
+        )
+    )]
+    #[OA\Tag(name: 'Orders')]
     public function listOrders(GetOrdersQueryHandler $handler, Request $request): JsonResponse
     {
-        $envelope = ResponseEnvelope::success($handler(new GetOrdersQuery($request->get('status'))));
+        $query = new GetOrdersQuery($request->query->get('status'));
 
-        return new JsonResponse($envelope->body, $envelope->status);
+        $orders = $handler($query);
+
+        return $this->json([
+            'data' => $orders
+        ]);
+
+        // $envelope = ResponseEnvelope::success($orders);
+        // return new JsonResponse($envelope->body, $envelope->status);
     }
 
     #[Route('', name: 'orders.create', methods: ['POST'])]

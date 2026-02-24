@@ -6,7 +6,6 @@ use App\Catalogue\Application\Command\CreateProductCommand;
 use App\Catalogue\Application\Command\Handler\CreateProductCommandHandler;
 use App\Catalogue\Application\Query\GetProductsQuery;
 use App\Catalogue\Application\Query\Handler\GetProductsQueryHandler;
-use App\Catalogue\Domain\Entity\Product;
 use App\Catalogue\Dto\ProductDto;
 use App\SharedKernel\Http\ResponseEnvelope;
 use Nelmio\ApiDocBundle\Attribute\Model;
@@ -62,8 +61,6 @@ class ProductController extends AbstractController
 
         return $this->json([
             'data' => $products
-        ], context:[
-            'groups' => 'product:list'
         ]);
 
         // $json = $serializer->serialize([
@@ -71,8 +68,10 @@ class ProductController extends AbstractController
         // ],'json', [
         //     'groups' => 'product:list'
         // ]);
-
         // return new JsonResponse($json, JsonResponse::HTTP_OK, [], true);
+
+        // $envelope = ResponseEnvelope::success($products);
+        // return new JsonResponse($envelope->body, $envelope->status);
     }
 
     #[Route('', name: 'products.create', methods: ['POST'])]
