@@ -89,7 +89,7 @@ class OrderController extends AbstractController
     #[Route('/{orderId}/fulfill', name: 'orders.fulfill', methods: ['POST'])]
     public function fulfill(FulfillOrderCommandHandler $handler, Request $request): JsonResponse
     {
-        $handler($request->get('orderId'));
+        $handler($request->attributes->get('orderId'));
         $envelope = ResponseEnvelope::success();
         return new JsonResponse($envelope->body, $envelope->status);
     }
