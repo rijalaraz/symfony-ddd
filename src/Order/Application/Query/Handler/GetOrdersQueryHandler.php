@@ -6,6 +6,7 @@ use App\Order\Application\Query\GetOrdersQuery;
 use App\Order\Domain\Entity\Order;
 use App\Order\Domain\Enum\OrderStatus;
 use App\Order\Domain\Repository\OrderRepositoryInterface;
+use Src\Order\Mapper\OrderMapper;
 
 class GetOrdersQueryHandler
 {
@@ -21,15 +22,19 @@ class GetOrdersQueryHandler
             $status = OrderStatus::tryFrom($query->status);
         }
         $collection = $this->orderRepository->getCollection($status);
+
         if (!empty($collection)) {
-            foreach ($collection as $order) {
-                $result[] = [
-                    'id' => $order->getId(),
-                    'status' => $order->getStatus(),
-                    'items' => $this->getItems($order)
-                ];
-            }
+            $result = $collection;
+
+            // foreach ($collection as $order) {
+            //     $result[] = [
+            //         'id' => $order->getId(),
+            //         'status' => $order->getStatus(),
+            //         'items' => $this->getItems($order)
+            //     ];
+            // }
         }
+
         return $result;
     }
 

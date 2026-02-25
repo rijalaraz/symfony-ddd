@@ -7,6 +7,7 @@ use App\Catalogue\Application\Command\Handler\CreateProductCommandHandler;
 use App\Catalogue\Application\Query\GetProductsQuery;
 use App\Catalogue\Application\Query\Handler\GetProductsQueryHandler;
 use App\Catalogue\Dto\ProductDto;
+use App\Catalogue\Mapper\ProductMapper;
 use App\SharedKernel\Http\ResponseEnvelope;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -51,7 +52,7 @@ class ProductController extends AbstractController
         )
     )]
     #[OA\Tag(name: 'Products')]
-    public function listProducts(GetProductsQueryHandler $handler, Request $request, SerializerInterface $serializer): JsonResponse
+    public function listProducts(GetProductsQueryHandler $handler, Request $request, SerializerInterface $serializer, ProductMapper $productMapper): JsonResponse
     {
         $onlyAvailable = filter_var($request->query->get('only_available', 'false'), FILTER_VALIDATE_BOOLEAN);
 
@@ -60,13 +61,15 @@ class ProductController extends AbstractController
         $products = $handler($query);
 
         return $this->json([
-            'data' => $products
+            'data' => $productMapper->toDto($products)
+        ], context: [
+            'groups' => ['product:list']
         ]);
 
         // $json = $serializer->serialize([
         //     'data' => $products
         // ],'json', [
-        //     'groups' => 'product:list'
+        //     'groups' => ['product:list']
         // ]);
         // return new JsonResponse($json, JsonResponse::HTTP_OK, [], true);
 

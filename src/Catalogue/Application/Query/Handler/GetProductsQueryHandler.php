@@ -16,16 +16,16 @@ class GetProductsQueryHandler
         $result = [];
         $collection = $this->productRepository->getCollection($query->onlyAvailable, $query->maxPrice);
         if (!empty($collection)) {
+            $result = $collection;
 
-            foreach ($collection as $product) {
-                $result[] = [
-                    'id' => $product->getId(),
-                    'name' => $product->getName(),
-                    'majorPrice' => $product->getPrice()->toMajorString(),
-                    'availableQuantity' => $product->getAvailable()
-                ];
-            }
-
+            // foreach ($collection as $product) {
+            //     $result[] = [
+            //         'id' => $product->getId(),
+            //         'name' => $product->getName(),
+            //         'majorPrice' => $product->getPrice()->toMajorString(),
+            //         'availableQuantity' => $product->getAvailable()
+            //     ];
+            // }
         }
 
         return $result;

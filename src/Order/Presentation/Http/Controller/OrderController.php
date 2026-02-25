@@ -8,6 +8,7 @@ use App\Order\Application\Command\Handler\FulfillOrderCommandHandler;
 use App\Order\Application\Query\GetOrdersQuery;
 use App\Order\Application\Query\Handler\GetOrdersQueryHandler;
 use App\Order\Dto\OrderDto;
+use App\Order\Mapper\OrderMapper;
 use App\SharedKernel\Http\ResponseEnvelope;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -44,14 +45,16 @@ class OrderController extends AbstractController
         )
     )]
     #[OA\Tag(name: 'Orders')]
-    public function listOrders(GetOrdersQueryHandler $handler, Request $request): JsonResponse
+    public function listOrders(GetOrdersQueryHandler $handler, Request $request, OrderMapper $orderMapper): JsonResponse
     {
         $query = new GetOrdersQuery($request->query->get('status'));
 
         $orders = $handler($query);
 
         return $this->json([
-            'data' => $orders
+            'data' => $orderMapper->toDto($orders)
+        ], context:[
+            'groups' => ['order:list']
         ]);
 
         // $envelope = ResponseEnvelope::success($orders);
