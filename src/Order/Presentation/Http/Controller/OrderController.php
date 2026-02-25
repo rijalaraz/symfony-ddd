@@ -7,6 +7,7 @@ use App\Order\Application\Command\Handler\CreateOrderCommandHandler;
 use App\Order\Application\Command\Handler\FulfillOrderCommandHandler;
 use App\Order\Application\Query\GetOrdersQuery;
 use App\Order\Application\Query\Handler\GetOrdersQueryHandler;
+use App\Order\Domain\Enum\OrderStatus;
 use App\Order\Dto\OrderDto;
 use App\Order\Mapper\OrderMapper;
 use App\SharedKernel\Http\ResponseEnvelope;
@@ -28,7 +29,10 @@ class OrderController extends AbstractController
         in: 'query',
         description: 'Filter to return only orders with the specified status (e.g., pending, fulfilled).',
         required: false,
-        schema: new OA\Schema(type: 'string')
+        schema: new OA\Schema(
+            type: 'string',
+            enum: [OrderStatus::PENDING, OrderStatus::RESERVED, OrderStatus::FULFILLED, OrderStatus::FAILED],
+        )
     )]
     #[OA\Response(
         response: JsonResponse::HTTP_OK,
