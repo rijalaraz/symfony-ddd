@@ -42,3 +42,6 @@ services:
     App\SharedKernel\Infrastructure\Http\Exception\ExceptionListener:
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
+
+    App\Validator\NotZeroValidator:
+        tags: ['validator.constraint_validator']

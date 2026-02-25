@@ -23,6 +23,10 @@ class ProductController extends AbstractController
 {
 
     #[Route('', name: 'products.list', methods: ['GET'])]
+    #[OA\Get(
+        summary: 'Liste des produits',
+        description:'Liste des produits commandables',
+    )]
     #[OA\Parameter(
         name: 'only_available',
         in: 'query',
@@ -78,6 +82,10 @@ class ProductController extends AbstractController
     }
 
     #[Route('', name: 'products.create', methods: ['POST'])]
+    #[OA\Post(
+        summary: "Création d'un produit",
+        description: "Création d'un produit avec son prix"
+    )]
     #[OA\RequestBody(
         description: 'Product data',
         required: true,

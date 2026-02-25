@@ -24,31 +24,40 @@ class OrderController extends AbstractController
 {
 
     #[Route('', name: 'orders.list', methods: ['GET'])]
-    #[OA\Parameter(
-        name: 'status',
-        in: 'query',
-        description: 'Filter to return only orders with the specified status (e.g., pending, fulfilled).',
-        required: false,
-        schema: new OA\Schema(
-            type: 'string',
-            enum: [OrderStatus::PENDING, OrderStatus::RESERVED, OrderStatus::FULFILLED, OrderStatus::FAILED],
-        )
-    )]
-    #[OA\Response(
-        response: JsonResponse::HTTP_OK,
-        description: 'List of orders',
-        content: new OA\JsonContent(
-            type:'object',
-            properties: [
-                new OA\Property(
-                    property: 'data',
-                    type:'array',
-                    items: new OA\Items(ref: new Model(type: OrderDto::class, groups: ['order:list']))
+    #[OA\Get(
+        path: '/api/orders',
+        summary: 'Liste des commandes',
+        description: 'Liste des commandes avec leurs articles',
+        tags: ['Orders'],
+        parameters: [
+            new OA\Parameter(
+                name: 'status',
+                in: 'query',
+                description: 'Filter to return only orders with the specified status (e.g., pending, fulfilled).',
+                required: false,
+                schema: new OA\Schema(
+                    type: 'string',
+                    enum: [OrderStatus::PENDING, OrderStatus::RESERVED, OrderStatus::FULFILLED, OrderStatus::FAILED],
                 )
-            ]
-        )
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: JsonResponse::HTTP_OK,
+                description: 'List of orders',
+                content: new OA\JsonContent(
+                    type:'object',
+                    properties: [
+                        new OA\Property(
+                            property: 'data',
+                            type:'array',
+                            items: new OA\Items(ref: new Model(type: OrderDto::class, groups: ['order:list']))
+                        )
+                    ]
+                )
+            )
+        ]
     )]
-    #[OA\Tag(name: 'Orders')]
     public function listOrders(GetOrdersQueryHandler $handler, Request $request, OrderMapper $orderMapper): JsonResponse
     {
         $query = new GetOrdersQuery($request->query->get('status'));
@@ -66,22 +75,29 @@ class OrderController extends AbstractController
     }
 
     #[Route('', name: 'orders.create', methods: ['POST'])]
-    #[OA\RequestBody(
-        description: 'Order creation payload',
-        required: true,
-        content: new OA\JsonContent(ref: new Model(type: OrderDto::class, groups: ['order:create']))
+    #[OA\Post(
+        path:'/api/orders',
+        summary: 'Créer une nouvelle commande',
+        description: 'Créer une nouvelle commande avec des produits déjà existants',
+        tags: ['Orders'],
+        requestBody: new OA\RequestBody(
+            description: 'Order creation payload',
+            required: true,
+            content: new OA\JsonContent(ref: new Model(type: OrderDto::class, groups: ['order:create']))
+        ),
+        responses: [
+            new OA\Response(
+                response: JsonResponse::HTTP_CREATED,
+                description: 'Order created successfully',
+                content: new OA\JsonContent(
+                    type:'object',
+                    properties: [
+                        new OA\Property(property: 'data', ref:new Model(type:OrderDto::class, groups: ['order:detail']))
+                    ]
+                )
+            )
+        ]
     )]
-    #[OA\Response(
-        response: JsonResponse::HTTP_CREATED,
-        description: 'Order created successfully',
-        content: new OA\JsonContent(
-            type:'object',
-            properties: [
-                new OA\Property(property: 'data', ref:new Model(type:OrderDto::class, groups: ['order:detail']))
-            ]
-        )
-    )]
-    #[OA\Tag(name: 'Orders')]
     public function create(CreateOrderCommandHandler $handler, Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -94,6 +110,7 @@ class OrderController extends AbstractController
     }
 
     #[Route('/{orderId}/fulfill', name: 'orders.fulfill', methods: ['POST'])]
+    #[OA\Tag(name:'Orders')]
     public function fulfill(FulfillOrderCommandHandler $handler, Request $request): JsonResponse
     {
         $handler($request->attributes->get('orderId'));
